@@ -239,7 +239,7 @@ static void save_thread(Shot* shot) {
         const int tw = 320;
         const int th = (int)((long long)shot->h * tw / (shot->w > 0 ? shot->w : 1));
         if (th > 0) {
-            std::vector<uint8_t> small((size_t)tw * th * 4);
+                        std::vector<uint8_t> tpx((size_t)tw * th * 4);
             for (int y = 0; y < th; ++y) {
                 int y0 = (int)((long long)y * shot->h / th), y1 = (int)((long long)(y + 1) * shot->h / th);
                 if (y1 <= y0) y1 = y0 + 1;
@@ -252,12 +252,12 @@ static void save_thread(Shot* shot) {
                             const uint8_t* p = &shot->rgba[((size_t)yy * shot->w + xx) * 4];
                             sum[0] += p[0]; sum[1] += p[1]; sum[2] += p[2]; ++n;
                         }
-                    uint8_t* q = &small[((size_t)y * tw + x) * 4];
+                                        uint8_t* q = &tpx[((size_t)y * tw + x) * 4];
                     q[0] = (uint8_t)(sum[0] / n); q[1] = (uint8_t)(sum[1] / n); q[2] = (uint8_t)(sum[2] / n); q[3] = 255;
                 }
             }
             int tlen = 0;
-            unsigned char* tpng = stbi_write_png_to_mem(small.data(), tw * 4, tw, th, 4, &tlen);
+                                    unsigned char* tpng = stbi_write_png_to_mem(tpx.data(), tw * 4, tw, th, 4, &tlen);
             if (tpng) {
                 make_dirs(g_thumb_dir);
                 HANDLE fh = CreateFileW((g_thumb_dir + name).c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
