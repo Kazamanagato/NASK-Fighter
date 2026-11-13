@@ -1,0 +1,34 @@
+name: Build nask_capture.dll
+
+on:
+  push:
+    paths: [ "plugin_src/**", ".github/workflows/build.yml" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download third-party headers (REFramework API and stb_image_write)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force plugin_src/include/reframework | Out-Null
+          Invoke-WebRequest https://raw.githubusercontent.com/praydog/REFramework/master/include/reframework/API.h -OutFile plugin_src/include/reframework/API.h
+          Invoke-WebRequest https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h -OutFile plugin_src/include/stb_image_write.h
+
+      - name: Configure
+        run: cmake -S plugin_src -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: SHA-256
+        shell: pwsh
+        run: Get-FileHash build/Release/nask_capture.dll -Algorithm SHA256 | Format-List
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nask_capture
+          path: build/Release/nask_capture.dll
